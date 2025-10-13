@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import WebViewScreen from '../../src/screens/WebViewScreen';
-import NotificationTestButton from '../../src/components/NotificationTestButton';
 import useAuth from '../../src/hooks/useAuth';
 import config from '../../src/config/config';
 import { requestPermissions, registerForPushNotifications } from '../../src/services/pushService';
@@ -10,11 +9,6 @@ import { setWebViewNavigate, handleNotification, handleNotificationResponse } fr
 import { registerPushToken, unregisterPushToken } from '../../src/services/pushTokenService';
 import { share } from '../../src/services/sharingService';
 import { getInitialURL, addDeepLinkListener, handleDeepLink } from '../../src/services/deepLinkService';
-
-// Import notification testers in development mode
-if (__DEV__) {
-  require('../../src/utils/notificationTester');
-}
 
 /**
  * Main Home Screen
@@ -272,14 +266,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <>
-      <WebViewScreen
-        ref={webViewRef}
-        onMessage={handleWebMessage}
-        onNavigate={handleWebViewNavigate}
-      />
-      <NotificationTestButton />
-    </>
+    <WebViewScreen
+      ref={webViewRef}
+      onMessage={handleWebMessage}
+      onNavigate={handleWebViewNavigate}
+    />
   );
 }
 

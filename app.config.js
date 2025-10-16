@@ -110,21 +110,8 @@ module.exports = {
           defaultChannel: 'default',
         },
       ],
-      // ===== IN-APP PURCHASES PLUGIN (CONDITIONAL) =====
-      // IMPORTANT: This plugin is ONLY added if FEATURES.IN_APP_PURCHASES is true
-      // This ensures zero traces of IAP code in builds where IAP is disabled
-      ...(config.FEATURES.IN_APP_PURCHASES
-        ? [
-            [
-              'react-native-purchases',
-              {
-                // RevenueCat API Keys from config
-                apiKeyApple: config.IAP.REVENUECAT_API_KEY_IOS,
-                apiKeyGoogle: config.IAP.REVENUECAT_API_KEY_ANDROID,
-              },
-            ],
-          ]
-        : []),
+      // Note: react-native-purchases doesn't require an Expo plugin
+      // It's configured programmatically in iapService.js
     ],
 
     // ===== EXPERIMENTS =====

@@ -86,7 +86,7 @@ const config = {
    * Required for push notifications to work in production
    * @example 'abc123-def456-ghi789'
    */
-  EXPO_PROJECT_ID: '19f6a466-105c-4e0a-b68b-ab137a815607',
+  EXPO_PROJECT_ID: '0275949e-9705-4237-bef3-6d0a4225dde2',
 
   /**
    * Push notification retry configuration

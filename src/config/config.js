@@ -63,6 +63,7 @@ const config = {
     PUSH_NOTIFICATIONS: true,
     SHARING: true,
     DEEP_LINKING: true,
+    IN_APP_PURCHASES: false, // Set to true to enable subscription/payment features
   },
 
   // ===== Authentication =====
@@ -94,6 +95,191 @@ const config = {
     MAX_RETRIES: 3,
     INITIAL_DELAY_MS: 1000,
     MAX_DELAY_MS: 10000,
+  },
+
+  // ===== In-App Purchases (IAP) =====
+  // IMPORTANT: This section is ONLY used if FEATURES.IN_APP_PURCHASES is set to true
+  // If IAP is disabled, no code or dependencies related to payments will be included in the build
+
+  /**
+   * In-App Purchases Configuration
+   *
+   * SETUP STEPS WHEN ENABLING IAP:
+   * 1. Set FEATURES.IN_APP_PURCHASES to true
+   * 2. Install dependencies: npm install react-native-purchases
+   * 3. Configure RevenueCat API keys below
+   * 4. Create products in App Store Connect and Google Play Console
+   * 5. Configure products in RevenueCat dashboard
+   * 6. See IAP_COMPLETE_GUIDE.md for full documentation
+   */
+  IAP: {
+    /**
+     * RevenueCat API Keys
+     * Get these from: https://app.revenuecat.com > Project Settings > API Keys
+     *
+     * IMPORTANT: Keep these keys secure. Consider using environment variables in production.
+     * For development, you can use the sandbox keys from RevenueCat.
+     *
+     * @example 'appl_xxxxxxxxxxxxxxxxxxxxxx' (iOS)
+     * @example 'goog_xxxxxxxxxxxxxxxxxxxxxx' (Android)
+     */
+    REVENUECAT_API_KEY_IOS: '', // Get from https://app.revenuecat.com
+    REVENUECAT_API_KEY_ANDROID: '', // Get from https://app.revenuecat.com
+
+    /**
+     * App User ID mode
+     * - 'custom': Use your own user ID (recommended for apps with authentication)
+     * - 'anonymous': Let RevenueCat generate anonymous IDs
+     *
+     * When using 'custom', the app will use the userId from AuthContext
+     */
+    USER_ID_MODE: 'custom',
+
+    /**
+     * Subscription Product IDs
+     * These must match exactly with the Product IDs created in:
+     * - iOS: App Store Connect > Your App > In-App Purchases
+     * - Android: Play Console > Your App > Monetize > Subscriptions
+     *
+     * Product ID naming convention: {duration}_{tier}
+     * @example ['monthly_premium', 'yearly_premium', 'monthly_basic']
+     */
+    SUBSCRIPTION_PRODUCTS: [
+      // Add your subscription product IDs here
+      // 'monthly_premium',
+      // 'yearly_premium',
+    ],
+
+    /**
+     * One-Time Purchase Product IDs (Non-consumable)
+     * For lifetime access or permanent unlocks
+     *
+     * @example ['lifetime_access', 'remove_ads']
+     */
+    ONE_TIME_PRODUCTS: [
+      // Add your one-time purchase product IDs here
+      // 'lifetime_access',
+    ],
+
+    /**
+     * Consumable Product IDs
+     * For products that can be purchased multiple times (credits, coins, etc.)
+     *
+     * @example ['100_coins', '500_coins', '1000_coins']
+     */
+    CONSUMABLE_PRODUCTS: [
+      // Add your consumable product IDs here
+      // '100_coins',
+      // '500_coins',
+    ],
+
+    /**
+     * RevenueCat Offering ID
+     * Offerings allow you to group products and A/B test pricing
+     * Configure offerings in RevenueCat dashboard
+     *
+     * @default 'default'
+     */
+    DEFAULT_OFFERING: 'default',
+
+    /**
+     * Entitlement IDs
+     * Entitlements represent access levels, not products
+     * Configure in RevenueCat dashboard under Entitlements
+     *
+     * @example { PREMIUM: 'premium_access', PRO: 'pro_access' }
+     */
+    ENTITLEMENTS: {
+      PREMIUM: 'premium', // Users with active subscription
+      // Add more entitlement IDs as needed
+    },
+
+    /**
+     * Backend API Configuration for IAP
+     * Endpoints to sync purchase state with your backend
+     * See BACKEND_IAP_ENDPOINTS.md for API specification
+     */
+    BACKEND_API: {
+      /**
+       * Base URL for your backend API
+       * @example 'https://api.yourapp.com'
+       */
+      BASE_URL: '',
+
+      /**
+       * API endpoints for IAP operations
+       * These endpoints will receive purchase updates from the app
+       * See BACKEND_IAP_ENDPOINTS.md for request/response formats
+       */
+      ENDPOINTS: {
+        // Validate and sync subscription status
+        SYNC_SUBSCRIPTION: '/api/users/:userId/subscription/sync',
+
+        // Get current subscription status from backend
+        GET_SUBSCRIPTION_STATUS: '/api/users/:userId/subscription/status',
+
+        // Get purchase history
+        GET_PURCHASE_HISTORY: '/api/users/:userId/subscription/history',
+      },
+
+      /**
+       * RevenueCat Webhook URL (configured in RevenueCat dashboard)
+       * Your backend should expose this endpoint to receive purchase events
+       * See IAP_WEBHOOKS.md for implementation details
+       *
+       * @example 'https://api.yourapp.com/api/webhooks/revenuecat'
+       */
+      WEBHOOK_URL: '',
+    },
+
+    /**
+     * Storage keys for IAP data in SecureStore
+     */
+    STORAGE_KEYS: {
+      SUBSCRIPTION_STATUS: 'iap_subscription_status',
+      CUSTOMER_INFO: 'iap_customer_info',
+      ACTIVE_ENTITLEMENTS: 'iap_active_entitlements',
+      LAST_SYNC: 'iap_last_sync',
+    },
+
+    /**
+     * Feature flags for IAP behavior
+     */
+    FEATURES: {
+      // Show restore purchases button in UI
+      ALLOW_RESTORE_PURCHASES: true,
+
+      // Automatically sync with backend after purchase
+      AUTO_SYNC_BACKEND: true,
+
+      // Show purchase history in app
+      SHOW_PURCHASE_HISTORY: false,
+
+      // Enable promotional offers (iOS only)
+      ENABLE_PROMOTIONAL_OFFERS: true,
+    },
+
+    /**
+     * Error messages for IAP operations
+     */
+    ERROR_MESSAGES: {
+      PURCHASE_CANCELLED: 'Purchase was cancelled.',
+      PURCHASE_FAILED: 'Purchase failed. Please try again.',
+      RESTORE_FAILED: 'Failed to restore purchases. Please try again.',
+      NETWORK_ERROR: 'Network error. Please check your connection.',
+      PRODUCT_NOT_AVAILABLE: 'This product is currently unavailable.',
+      ALREADY_SUBSCRIBED: 'You already have an active subscription.',
+      INVALID_PRODUCT: 'Invalid product. Please contact support.',
+    },
+
+    /**
+     * Success messages for IAP operations
+     */
+    SUCCESS_MESSAGES: {
+      PURCHASE_SUCCESS: 'Purchase successful! Thank you.',
+      RESTORE_SUCCESS: 'Purchases restored successfully.',
+      SUBSCRIPTION_ACTIVE: 'Your subscription is active.',
+    },
   },
 
   // ===== Deep Linking & Sharing =====

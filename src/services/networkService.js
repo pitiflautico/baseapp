@@ -18,27 +18,14 @@ let unsubscribe = null;
  */
 export const isConnected = async (forceRefresh = false) => {
   try {
-    // Force NetInfo to refresh by calling fetch multiple times with a small delay
+    // Force NetInfo to refresh by calling fetch with a small delay
     if (forceRefresh) {
-      if (config.DEBUG) {
-        console.log('[Network Service] Forcing connection refresh...');
-      }
       // Wait a bit to ensure network state is fresh
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     const state = await NetInfo.fetch();
     const connected = state.isConnected && state.isInternetReachable !== false;
-
-    if (config.DEBUG) {
-      console.log('[Network Service] Connection check:', {
-        isConnected: state.isConnected,
-        isInternetReachable: state.isInternetReachable,
-        type: state.type,
-        result: connected,
-        forceRefresh,
-      });
-    }
 
     return connected;
   } catch (error) {
@@ -59,22 +46,8 @@ export const subscribeToNetworkChanges = (callback) => {
     return () => {}; // No-op if offline mode is disabled
   }
 
-  if (config.DEBUG) {
-    console.log('[Network Service] Subscribing to network changes');
-  }
-
   unsubscribe = NetInfo.addEventListener((state) => {
     const connected = state.isConnected && state.isInternetReachable !== false;
-
-    if (config.DEBUG) {
-      console.log('[Network Service] Connection state changed:', {
-        isConnected: state.isConnected,
-        isInternetReachable: state.isInternetReachable,
-        type: state.type,
-        connected,
-      });
-    }
-
     callback(connected);
   });
 
@@ -93,10 +66,6 @@ export const unsubscribeFromNetworkChanges = () => {
   if (unsubscribe) {
     unsubscribe();
     unsubscribe = null;
-
-    if (config.DEBUG) {
-      console.log('[Network Service] Unsubscribed from network changes');
-    }
   }
 };
 

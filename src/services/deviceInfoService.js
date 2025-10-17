@@ -73,10 +73,6 @@ export const getDeviceInfo = async () => {
     deviceInfo.isDevice = Device.isDevice; // false if simulator/emulator
     deviceInfo.deviceYearClass = Device.deviceYearClass || null;
 
-    if (config.DEBUG) {
-      console.log('[Device Info Service] Device info collected:', deviceInfo);
-    }
-
     return deviceInfo;
   } catch (error) {
     console.error('[Device Info Service] Failed to collect device info:', error);
@@ -114,13 +110,6 @@ export const subscribeToScreenChanges = (callback) => {
   }
 
   return Dimensions.addEventListener('change', ({ window }) => {
-    if (config.DEBUG) {
-      console.log('[Device Info Service] Screen dimensions changed:', {
-        width: Math.round(window.width),
-        height: Math.round(window.height),
-      });
-    }
-
     callback({
       screenWidth: Math.round(window.width),
       screenHeight: Math.round(window.height),

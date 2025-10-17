@@ -47,13 +47,11 @@ app-base/
 │   │   └── LoadingScreen.js        # Loading state
 │   └── App.js                      # App entry point
 └── docs/
-    ├── IN_APP_PURCHASES.md         # IAP system overview
-    ├── IAP_COMPLETE_GUIDE.md       # IAP setup guide (start here)
-    ├── IAP_API.md                  # Web ↔ Native communication
-    ├── BACKEND_IAP_ENDPOINTS.md    # Backend API spec
-    ├── IAP_WEBHOOKS.md             # Webhook configuration
-    ├── STORE_SETUP.md              # Store configuration
-    └── IAP_TESTING.md              # Testing procedures
+    ├── IAP_QUICK_START.md          # Quick start: enable IAP in 3 steps
+    ├── IAP_SETUP_GUIDE.md          # Complete IAP setup guide
+    ├── IAP_README.md               # IAP system architecture overview
+    ├── IAP_WEB_INTEGRATION.md      # Web ↔ Native communication
+    └── IAP_WEBHOOKS.md             # RevenueCat webhook configuration
 ```
 
 ---
@@ -259,7 +257,7 @@ Enable subscriptions and one-time purchases for premium features.
    ```
 
 3. Follow complete setup guide:
-   **[📖 docs/IAP_COMPLETE_GUIDE.md](./docs/IAP_COMPLETE_GUIDE.md)**
+   **[📖 docs/IAP_SETUP_GUIDE.md](./docs/IAP_SETUP_GUIDE.md)**
 
 ### What You Get
 
@@ -272,15 +270,13 @@ Enable subscriptions and one-time purchases for premium features.
 
 ### IAP Documentation
 
-- **[IAP_COMPLETE_GUIDE.md](./docs/IAP_COMPLETE_GUIDE.md)** - Start here: Complete setup walkthrough
-- **[IN_APP_PURCHASES.md](./docs/IN_APP_PURCHASES.md)** - System architecture overview
-- **[IAP_API.md](./docs/IAP_API.md)** - Web ↔ Native communication protocol
-- **[BACKEND_IAP_ENDPOINTS.md](./docs/BACKEND_IAP_ENDPOINTS.md)** - Backend API implementation
-- **[IAP_WEBHOOKS.md](./docs/IAP_WEBHOOKS.md)** - Webhook setup and validation
-- **[STORE_SETUP.md](./docs/STORE_SETUP.md)** - App Store & Play Console configuration
-- **[IAP_TESTING.md](./docs/IAP_TESTING.md)** - Testing with sandbox environments
+- **[IAP_QUICK_START.md](./docs/IAP_QUICK_START.md)** - Quick start: Enable IAP in 3 steps
+- **[IAP_SETUP_GUIDE.md](./docs/IAP_SETUP_GUIDE.md)** - Complete setup walkthrough (RevenueCat, stores, testing)
+- **[IAP_README.md](./docs/IAP_README.md)** - System architecture and technical overview
+- **[IAP_WEB_INTEGRATION.md](./docs/IAP_WEB_INTEGRATION.md)** - Web ↔ Native communication protocol
+- **[IAP_WEBHOOKS.md](./docs/IAP_WEBHOOKS.md)** - Webhook setup with RevenueCat
 
-**Estimated setup time:** 4-6 hours
+**Estimated setup time:** 4-6 hours (including store configuration)
 
 ---
 
@@ -579,7 +575,7 @@ git merge upstream/main
 
 ### IAP Issues
 
-See [IAP_TESTING.md](./docs/IAP_TESTING.md) troubleshooting section.
+See [IAP_SETUP_GUIDE.md](./docs/IAP_SETUP_GUIDE.md) troubleshooting section.
 
 ---
 
@@ -596,7 +592,8 @@ See [IAP_TESTING.md](./docs/IAP_TESTING.md) troubleshooting section.
 - [Android Play Store Policies](https://play.google.com/about/developer-content-policy/)
 
 ### This Project
-- [IAP Complete Guide](./docs/IAP_COMPLETE_GUIDE.md)
+- [IAP Quick Start](./docs/IAP_QUICK_START.md)
+- [IAP Setup Guide](./docs/IAP_SETUP_GUIDE.md)
 - [All IAP Documentation](./docs/)
 
 ---
@@ -626,8 +623,8 @@ MIT License - Use this base app for any project, commercial or personal.
 
 **Questions?** Check the [docs/](./docs/) folder for detailed guides.
 
-**Need IAP?** Start with [IAP_COMPLETE_GUIDE.md](./docs/IAP_COMPLETE_GUIDE.md)
+**Need IAP?** Start with [IAP_QUICK_START.md](./docs/IAP_QUICK_START.md)
 
 ---
 
-**Last Updated:** 2025-10-16
+**Last Updated:** 2025-10-17

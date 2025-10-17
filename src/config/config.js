@@ -14,7 +14,7 @@ const config = {
    * Change this to your web application URL for each new app
    * @example 'https://example.com'
    */
-  WEB_URL: 'http://127.0.0.1:8000',
+  WEB_URL: 'http://127.0.0.1:8000/',
 
   // ===== App Information =====
 
@@ -62,8 +62,10 @@ const config = {
   FEATURES: {
     PUSH_NOTIFICATIONS: true,
     SHARING: true,
-    DEEP_LINKING: true,
+    DEEP_LINKING: false, // Temporarily disabled for testing
     IN_APP_PURCHASES: false, // Set to true to enable subscription/payment features
+    OFFLINE_MODE: true, // Show native screen when no internet connection
+    DEVICE_INFO: true, // Expose device/app info to web app
   },
 
   // ===== Authentication =====
@@ -339,6 +341,65 @@ const config = {
     NO_CONNECTION: 'No internet connection. Please check your network and try again.',
     FAILED_TO_LOAD: 'Failed to load the application. Please try again.',
     GENERIC_ERROR: 'Something went wrong. Please try again later.',
+  },
+
+  // ===== Offline Mode =====
+
+  /**
+   * Offline Mode Configuration
+   * Shows a native screen when there's no internet connection
+   */
+  OFFLINE_MODE: {
+    /**
+     * Check connection on app start
+     */
+    CHECK_ON_START: true,
+
+    /**
+     * Retry configuration
+     */
+    RETRY: {
+      ENABLED: true,
+      BUTTON_TEXT: 'Try Again',
+      AUTO_RETRY: true, // Auto-retry when connection is restored
+      CHECK_INTERVAL_MS: 5000, // Check every 5 seconds
+    },
+
+    /**
+     * UI Configuration
+     */
+    UI: {
+      TITLE: 'No Internet Connection',
+      MESSAGE: 'Please check your network connection and try again.',
+      ICON: '📡', // Emoji or leave empty for no icon
+    },
+  },
+
+  // ===== Device Info =====
+
+  /**
+   * Device Info Configuration
+   * Exposes device/app information to the web app via postMessage
+   */
+  DEVICE_INFO: {
+    /**
+     * Send device info automatically on WebView load
+     */
+    SEND_ON_LOAD: true,
+
+    /**
+     * Information to include
+     */
+    INCLUDE: {
+      APP_VERSION: true,
+      BUILD_NUMBER: true,
+      BUNDLE_ID: true,
+      PLATFORM: true,
+      OS_VERSION: true,
+      DEVICE_MODEL: true,
+      DEVICE_ID: true, // Unique device identifier
+      SCREEN_SIZE: true,
+    },
   },
 
   // ===== Development =====

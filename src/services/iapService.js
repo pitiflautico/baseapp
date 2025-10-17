@@ -249,7 +249,15 @@ if (!config.FEATURES.IN_APP_PURCHASES) {
 
       // Check if user has active entitlements
       const activeEntitlements = customerInfo.entitlements.active;
-      const isSubscribed = Object.keys(activeEntitlements).length > 0;
+      let isSubscribed = Object.keys(activeEntitlements).length > 0;
+
+      // Fallback: If no entitlements are configured, check activeSubscriptions
+      if (!isSubscribed && customerInfo.activeSubscriptions && customerInfo.activeSubscriptions.length > 0) {
+        isSubscribed = true;
+        if (config.DEBUG) {
+          console.log('[IAP Service] No entitlements configured, using activeSubscriptions as fallback');
+        }
+      }
 
       let expirationDate = null;
       if (isSubscribed) {
@@ -264,6 +272,7 @@ if (!config.FEATURES.IN_APP_PURCHASES) {
         console.log('[IAP Service] Subscription status:', {
           isSubscribed,
           entitlements: Object.keys(activeEntitlements),
+          activeSubscriptions: customerInfo.activeSubscriptions || [],
           expirationDate,
         });
       }

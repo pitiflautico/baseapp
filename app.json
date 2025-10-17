@@ -9,10 +9,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.appbase"
+      "bundleIdentifier": "com.nebulio.baseapp"
     },
     "android": {
-      "package": "com.yourcompany.appbase",
+      "package": "com.nebulio.baseapp",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

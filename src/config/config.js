@@ -14,7 +14,7 @@ const config = {
    * Change this to your web application URL for each new app
    * @example 'https://example.com'
    */
-  WEB_URL: 'http://127.0.0.1:8000',
+  WEB_URL: 'http://127.0.0.1:8084/iap-test.html',
 
   // ===== App Information =====
 
@@ -39,13 +39,13 @@ const config = {
    * iOS Bundle Identifier (reverse domain notation)
    * @example 'com.yourcompany.appname'
    */
-  IOS_BUNDLE_ID: 'com.yourcompany.appbase',
+  IOS_BUNDLE_ID: 'com.nebulio.baseapp',
 
   /**
    * Android Package Name (reverse domain notation)
    * @example 'com.yourcompany.appname'
    */
-  ANDROID_PACKAGE: 'com.yourcompany.appbase',
+  ANDROID_PACKAGE: 'com.nebulio.baseapp',
 
   // ===== Feature Flags =====
 
@@ -63,7 +63,7 @@ const config = {
     PUSH_NOTIFICATIONS: true,
     SHARING: true,
     DEEP_LINKING: true,
-    IN_APP_PURCHASES: false, // Set to true to enable subscription/payment features
+    IN_APP_PURCHASES: true, // Set to true to enable subscription/payment features
   },
 
   // ===== Authentication =====
@@ -123,8 +123,8 @@ const config = {
      * @example 'appl_xxxxxxxxxxxxxxxxxxxxxx' (iOS)
      * @example 'goog_xxxxxxxxxxxxxxxxxxxxxx' (Android)
      */
-    REVENUECAT_API_KEY_IOS: '', // Get from https://app.revenuecat.com
-    REVENUECAT_API_KEY_ANDROID: '', // Get from https://app.revenuecat.com
+    REVENUECAT_API_KEY_IOS: 'test_NpIFfDEYscPbGSqdbUBlopzMVaa', // Test/Development key
+    REVENUECAT_API_KEY_ANDROID: 'test_NpIFfDEYscPbGSqdbUBlopzMVaa', // Test/Development key
 
     /**
      * App User ID mode
@@ -145,9 +145,8 @@ const config = {
      * @example ['monthly_premium', 'yearly_premium', 'monthly_basic']
      */
     SUBSCRIPTION_PRODUCTS: [
-      // Add your subscription product IDs here
-      // 'monthly_premium',
-      // 'yearly_premium',
+      'monthly_premium',
+      'yearly_premium',
     ],
 
     /**
@@ -346,12 +345,12 @@ const config = {
   /**
    * Enable debug logging (set to false in production)
    */
-  DEBUG: __DEV__,
+  DEBUG: typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production',
 
   /**
    * Show detailed error information in UI (only in dev mode)
    */
-  SHOW_DEV_ERRORS: __DEV__,
+  SHOW_DEV_ERRORS: typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production',
 };
 
 module.exports = config;

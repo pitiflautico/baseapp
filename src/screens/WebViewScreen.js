@@ -163,10 +163,30 @@ const WebViewScreen = forwardRef(({ onMessage, url, onNavigate }, ref) => {
     }
   };
 
-  // Expose navigate and reload functions to parent via ref
+  /**
+   * Send message to WebView
+   */
+  const sendMessage = (message) => {
+    if (webViewRef.current) {
+      const jsCode = `
+        window.postMessage(${JSON.stringify(JSON.stringify(message))}, '*');
+        true;
+      `;
+      webViewRef.current.injectJavaScript(jsCode);
+
+      if (config.DEBUG) {
+        console.log('[WebView] Message sent to WebView:', message);
+      }
+    } else {
+      console.error('[WebView] Cannot send message, webViewRef is null');
+    }
+  };
+
+  // Expose navigate, reload, and sendMessage functions to parent via ref
   useImperativeHandle(ref, () => ({
     navigateToUrl,
     reload: reloadWebView,
+    sendMessage,
   }));
 
   // Call onNavigate callback when component mounts to give parent access to navigate

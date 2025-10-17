@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAP Test Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .status.loading {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button.primary {
+      background: #667eea;
+      color: white;
+    }
+
+    button.primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    button.secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    button.secondary:hover {
+      background: #e5e7eb;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .product-card {
+      border: 2px solid #e5e7eb;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    .product-card h3 {
+      color: #1f2937;
+      margin-bottom: 5px;
+    }
+
+    .product-card .price {
+      color: #667eea;
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .product-card .description {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .messages {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .message {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+      background: #f3f4f6;
+      border-left: 3px solid #667eea;
+    }
+
+    h2 {
+      color: #1f2937;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .badge.active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge.inactive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛒 IAP Test Interface</h1>
+
+    <div class="card">
+      <h2>Subscription Status
+        <span id="statusBadge" class="badge inactive">Not Subscribed</span>
+      </h2>
+      <div id="status" class="status loading">
+        ⏳ Checking subscription status...
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Actions</h2>
+      <button class="primary" onclick="getProducts()">
+        📦 Load Products
+      </button>
+      <button class="primary" onclick="getStatus()">
+        🔍 Check Subscription Status
+      </button>
+      <button class="secondary" onclick="restorePurchases()">
+        ♻️ Restore Purchases
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Available Products</h2>
+      <div id="products">
+        <p style="color: #6b7280;">Click "Load Products" to see available subscriptions</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Messages Log</h2>
+      <div id="messages" class="messages"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentStatus = null;
+    let availableProducts = [];
+
+    // Listen for messages from Native app
+    window.addEventListener('message', (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        logMessage('📨 Received from native', message);
+        handleNativeMessage(message);
+      } catch (e) {
+        console.error('Failed to parse message:', e);
+      }
+    });
+
+    function handleNativeMessage(message) {
+      switch (message.action) {
+        case 'subscriptionStatus':
+          updateSubscriptionStatus(message);
+          break;
+
+        case 'availableProducts':
+          displayProducts(message.products);
+          break;
+
+        case 'subscriptionUpdated':
+          showStatus('✅ Subscription Active!', 'success');
+          updateSubscriptionStatus(message);
+          break;
+
+        case 'purchaseFailed':
+          if (message.error === 'cancelled') {
+            showStatus('⚠️ Purchase cancelled by user', 'loading');
+          } else {
+            showStatus('❌ Purchase Failed: ' + message.message, 'error');
+          }
+          break;
+
+        case 'purchasesRestored':
+          if (message.isSubscribed) {
+            showStatus('✅ Purchases restored successfully!', 'success');
+            updateSubscriptionStatus(message);
+          } else {
+            showStatus('ℹ️ No active subscriptions found', 'loading');
+          }
+          break;
+
+        default:
+          logMessage('Unknown action', message);
+      }
+    }
+
+    function updateSubscriptionStatus(status) {
+      currentStatus = status;
+      const badge = document.getElementById('statusBadge');
+
+      if (status.isSubscribed) {
+        badge.textContent = 'Premium Active ✨';
+        badge.className = 'badge active';
+
+        const expiryDate = status.expirationDate
+          ? new Date(status.expirationDate).toLocaleDateString()
+          : 'Lifetime';
+
+        showStatus(`✅ You have Premium access!\nExpires: ${expiryDate}`, 'success');
+      } else {
+        badge.textContent = 'Not Subscribed';
+        badge.className = 'badge inactive';
+        showStatus('You do not have an active subscription', 'loading');
+      }
+    }
+
+    function displayProducts(products) {
+      availableProducts = products;
+      const productsDiv = document.getElementById('products');
+
+      if (!products || products.length === 0) {
+        productsDiv.innerHTML = '<p style="color: #991b1b;">No products available. Make sure products are configured in RevenueCat.</p>';
+        return;
+      }
+
+      productsDiv.innerHTML = '';
+
+      products.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+          <h3>${product.title}</h3>
+          <p class="description">${product.description}</p>
+          <div class="price">${product.priceString}</div>
+          <button class="primary" onclick="purchaseProduct('${product.identifier}')">
+            Subscribe Now
+          </button>
+        `;
+        productsDiv.appendChild(productCard);
+      });
+    }
+
+    function sendToNative(action, data = {}) {
+      const message = { action, ...data };
+
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify(message));
+        logMessage('📤 Sent to native', message);
+      } else {
+        showStatus('❌ Not running in native app. Testing not available.', 'error');
+        logMessage('❌ window.ReactNativeWebView not found', {});
+      }
+    }
+
+    function showStatus(text, className) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = text;
+      statusDiv.className = 'status ' + className;
+    }
+
+    function logMessage(title, data) {
+      const messagesDiv = document.getElementById('messages');
+      const messageEl = document.createElement('div');
+      messageEl.className = 'message';
+      messageEl.textContent = `${new Date().toLocaleTimeString()} - ${title}:\n${JSON.stringify(data, null, 2)}`;
+      messagesDiv.insertBefore(messageEl, messagesDiv.firstChild);
+    }
+
+    function getProducts() {
+      showStatus('⏳ Loading products...', 'loading');
+      sendToNative('getProducts');
+    }
+
+    function getStatus() {
+      showStatus('⏳ Checking subscription status...', 'loading');
+      sendToNative('getSubscriptionStatus');
+    }
+
+    function purchaseProduct(productId) {
+      showStatus('⏳ Initiating purchase...', 'loading');
+      sendToNative('purchase', { productId });
+    }
+
+    function restorePurchases() {
+      showStatus('⏳ Restoring purchases...', 'loading');
+      sendToNative('restorePurchases');
+    }
+
+    // Auto-request status and products on page load
+    setTimeout(() => {
+      if (window.ReactNativeWebView) {
+        getStatus();
+        getProducts();
+      } else {
+        showStatus('⚠️ Open this page in the native app to test IAP', 'loading');
+        logMessage('ℹ️ Info', {
+          message: 'This page must be loaded in the React Native WebView to test IAP functionality',
+          webUrl: 'Update WEB_URL in config.js to point to this page'
+        });
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

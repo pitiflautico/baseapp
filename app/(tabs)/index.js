@@ -9,6 +9,7 @@ import { setWebViewNavigate, handleNotification, handleNotificationResponse } fr
 import { registerPushToken, unregisterPushToken } from '../../src/services/pushTokenService';
 import { share } from '../../src/services/sharingService';
 import { getInitialURL, addDeepLinkListener, handleDeepLink } from '../../src/services/deepLinkService';
+import * as iapService from '../../src/services/iapService';
 
 /**
  * Main Home Screen
@@ -84,11 +85,47 @@ export default function HomeScreen() {
   }, []);
 
   /**
+   * Initialize In-App Purchases
+   */
+  useEffect(() => {
+    // Only initialize if feature is enabled
+    if (!config.FEATURES.IN_APP_PURCHASES) {
+      return;
+    }
+
+    const initIAP = async () => {
+      try {
+        if (config.DEBUG) {
+          console.log('[HomeScreen] Initializing IAP...');
+        }
+        const result = await iapService.initializeIAP(userId);
+        if (result.success) {
+          console.log('[HomeScreen] IAP initialized successfully');
+        } else {
+          console.warn('[HomeScreen] IAP initialization failed:', result.error);
+        }
+      } catch (error) {
+        console.error('[HomeScreen] Error initializing IAP:', error);
+      }
+    };
+
+    initIAP();
+  }, [userId]);
+
+  /**
    * Initialize deep linking
    */
   useEffect(() => {
     // Only initialize if feature is enabled
     if (!config.FEATURES.DEEP_LINKING) {
+      return;
+    }
+
+    // Skip deep linking for IAP test page
+    if (config.WEB_URL.includes('iap-test.html')) {
+      if (config.DEBUG) {
+        console.log('[HomeScreen] Skipping deep linking for IAP test page');
+      }
       return;
     }
 
@@ -247,6 +284,125 @@ export default function HomeScreen() {
           console.log('[HomeScreen] ✅ Content shared successfully');
         } else {
           console.warn('[HomeScreen] ⚠️ Share cancelled or failed');
+        }
+        break;
+
+      case 'getProducts':
+        // Get available IAP products
+        if (!config.FEATURES.IN_APP_PURCHASES) {
+          console.warn('[HomeScreen] IAP feature disabled');
+          return;
+        }
+
+        console.log('[HomeScreen] Getting available products...');
+        const productsResult = await iapService.getAvailableProducts();
+
+        if (productsResult.success && webViewRef.current?.sendMessage) {
+          webViewRef.current.sendMessage({
+            action: 'availableProducts',
+            products: productsResult.products,
+          });
+          console.log('[HomeScreen] ✅ Products sent to WebView:', productsResult.products.length);
+        } else {
+          console.error('[HomeScreen] Failed to get products:', productsResult.error);
+        }
+        break;
+
+      case 'getSubscriptionStatus':
+        // Get current subscription status
+        if (!config.FEATURES.IN_APP_PURCHASES) {
+          console.warn('[HomeScreen] IAP feature disabled');
+          return;
+        }
+
+        console.log('[HomeScreen] Checking subscription status...');
+        const statusResult = await iapService.getSubscriptionStatus();
+
+        if (webViewRef.current?.sendMessage) {
+          webViewRef.current.sendMessage({
+            action: 'subscriptionStatus',
+            isSubscribed: statusResult.isSubscribed,
+            entitlements: Object.keys(statusResult.entitlements || {}),
+            expirationDate: statusResult.expirationDate,
+          });
+          console.log('[HomeScreen] ✅ Subscription status sent to WebView:', statusResult.isSubscribed);
+        }
+        break;
+
+      case 'purchase':
+        // Purchase a product
+        if (!config.FEATURES.IN_APP_PURCHASES) {
+          console.warn('[HomeScreen] IAP feature disabled');
+          return;
+        }
+
+        if (!message.productId) {
+          console.error('[HomeScreen] Purchase failed: no productId provided');
+          return;
+        }
+
+        console.log('[HomeScreen] Initiating purchase:', message.productId);
+        const purchaseResult = await iapService.purchaseProduct(message.productId);
+
+        if (purchaseResult.success && webViewRef.current?.sendMessage) {
+          // Send success message to WebView
+          webViewRef.current.sendMessage({
+            action: 'subscriptionUpdated',
+            isSubscribed: true,
+            productId: purchaseResult.productIdentifier,
+          });
+          console.log('[HomeScreen] ✅ Purchase successful:', purchaseResult.productIdentifier);
+
+          // Also update subscription status
+          const updatedStatus = await iapService.getSubscriptionStatus();
+          if (webViewRef.current?.sendMessage) {
+            webViewRef.current.sendMessage({
+              action: 'subscriptionStatus',
+              isSubscribed: updatedStatus.isSubscribed,
+              entitlements: Object.keys(updatedStatus.entitlements || {}),
+              expirationDate: updatedStatus.expirationDate,
+            });
+          }
+        } else if (webViewRef.current?.sendMessage) {
+          // Send failure message to WebView
+          webViewRef.current.sendMessage({
+            action: 'purchaseFailed',
+            error: purchaseResult.error,
+            message: purchaseResult.message,
+          });
+          console.error('[HomeScreen] Purchase failed:', purchaseResult.error);
+        }
+        break;
+
+      case 'restorePurchases':
+        // Restore previous purchases
+        if (!config.FEATURES.IN_APP_PURCHASES) {
+          console.warn('[HomeScreen] IAP feature disabled');
+          return;
+        }
+
+        console.log('[HomeScreen] Restoring purchases...');
+        const restoreResult = await iapService.restorePurchases();
+
+        if (restoreResult.success) {
+          // Get updated subscription status
+          const restoredStatus = await iapService.getSubscriptionStatus();
+
+          if (webViewRef.current?.sendMessage) {
+            webViewRef.current.sendMessage({
+              action: 'purchasesRestored',
+              isSubscribed: restoredStatus.isSubscribed,
+              entitlements: Object.keys(restoredStatus.entitlements || {}),
+              expirationDate: restoredStatus.expirationDate,
+            });
+            console.log('[HomeScreen] ✅ Purchases restored successfully');
+          }
+        } else if (webViewRef.current?.sendMessage) {
+          webViewRef.current.sendMessage({
+            action: 'restoreFailed',
+            error: restoreResult.error,
+          });
+          console.error('[HomeScreen] Restore failed:', restoreResult.error);
         }
         break;
 
